@@ -110,7 +110,7 @@ module "storage" {
 
   resource_group_name = var.resource_group_name
   identifier          = var.identifier
-  containers = { for c in var.storage_containers : c => {} }
+  containers          = { for c in var.storage_containers : c => {} }
 
   subnets_id_whitelist = [module.subnet_appservice.subnet_id]
   ip_range_whitelist   = []
