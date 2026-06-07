@@ -7,15 +7,12 @@ resource "random_password" "administrator_login_password" {
 resource "azurerm_mssql_server" "primary" {
   name                         = local.its_production ? "mssql-${var.identifier}-primary" : "mssql-${var.identifier}"
   tags                         = data.azurerm_resource_group.rg.tags
-  resource_group_name          = azurerm_resource_group.example.name
-  location                     = azurerm_resource_group.example.location
+  resource_group_name          = data.azurerm_resource_group.rg.name
+  location                     = data.azurerm_resource_group.rg.location
   version                      = "12.0"
   administrator_login          = "sqladmin"
   administrator_login_password = random_password.administrator_login_password.result
-  azuread_administrator {
-    login_username = azurerm_user_assigned_identity.example.name
-    object_id      = azurerm_user_assigned_identity.example.principal_id
-  }
+
   minimum_tls_version           = "1.2"
   public_network_access_enabled = false
   timeouts {
@@ -30,17 +27,13 @@ resource "azurerm_mssql_server" "primary" {
 }
 
 resource "azurerm_mssql_server" "secondary" {
-  name                         = "mssqlserver-primary"
-  tags                         = data.azurerm_resource_group.rg.tags
-  resource_group_name          = azurerm_resource_group.example.name
-  location                     = azurerm_resource_group.example.location
-  version                      = "12.0"
-  administrator_login          = "sqladmin"
-  administrator_login_password = random_password.administrator_login_password.result
-  azuread_administrator {
-    login_username = azurerm_user_assigned_identity.example.name
-    object_id      = azurerm_user_assigned_identity.example.principal_id
-  }
+  name                          = "mssqlserver-primary"
+  tags                          = data.azurerm_resource_group.rg.tags
+  resource_group_name           = data.azurerm_resource_group.rg.name
+  location                      = data.azurerm_resource_group.rg.location
+  version                       = "12.0"
+  administrator_login           = "sqladmin"
+  administrator_login_password  = random_password.administrator_login_password.result
   minimum_tls_version           = "1.2"
   public_network_access_enabled = false
   timeouts {
@@ -57,7 +50,7 @@ resource "azurerm_mssql_server" "secondary" {
 resource "azurerm_mssql_database" "primary" {
   name               = "example-db"
   tags               = data.azurerm_resource_group.rg.tags
-  server_id          = azurerm_mssql_server.example.id
+  server_id          = azurerm_mssql_server.primary.id
   collation          = "SQL_Latin1_General_CP1_CI_AS"
   license_type       = "LicenseIncluded"
   max_size_gb        = 4
@@ -66,7 +59,7 @@ resource "azurerm_mssql_database" "primary" {
   secondary_type     = "Geo"
   geo_backup_enabled = true
   ledger_enabled     = true # True in DRP and PRD
-  long_term_retention_policy = {
+  long_term_retention_policy {
     weekly_retention          = "P3M"
     monthly_retention         = "P1Y"
     yearly_retention          = "P3Y"
@@ -77,14 +70,7 @@ resource "azurerm_mssql_database" "primary" {
     retention_days           = 30
     backup_interval_in_hours = 12
   }
-  threat_detection_policy {
-    state                      = "Enabled"
-    email_account_admins       = "Enabled"
-    email_addresses            = [""]
-    retention_days             = 90
-    storage_account_access_key = ""
-    storage_endpoint           = ""
-  }
+
   read_replica_count = 1    # Initial count
   read_scale         = true # True in DRP and PRD
 
@@ -97,7 +83,7 @@ resource "azurerm_mssql_database" "primary" {
 resource "azurerm_mssql_database" "secondary" {
   name               = "example-db"
   tags               = data.azurerm_resource_group.rg.tags
-  server_id          = azurerm_mssql_server.example.id
+  server_id          = azurerm_mssql_server.secondary.id
   collation          = "SQL_Latin1_General_CP1_CI_AS"
   license_type       = "LicenseIncluded"
   max_size_gb        = 4
@@ -106,7 +92,7 @@ resource "azurerm_mssql_database" "secondary" {
   secondary_type     = "Geo"
   geo_backup_enabled = true
   ledger_enabled     = true # True in DRP and PRD
-  long_term_retention_policy = {
+  long_term_retention_policy {
     weekly_retention          = "P3M"
     monthly_retention         = "P1Y"
     yearly_retention          = "P3Y"
@@ -117,14 +103,7 @@ resource "azurerm_mssql_database" "secondary" {
     retention_days           = 30
     backup_interval_in_hours = 12
   }
-  threat_detection_policy {
-    state                      = "Enabled"
-    email_account_admins       = "Enabled"
-    email_addresses            = [""]
-    retention_days             = 90
-    storage_account_access_key = ""
-    storage_endpoint           = ""
-  }
+
   read_replica_count = 1    # Initial count
   read_scale         = true # True in DRP and PRD
 
@@ -132,8 +111,7 @@ resource "azurerm_mssql_database" "secondary" {
   lifecycle {
     prevent_destroy = true
   }
-  creation_source_database_id = ""                # Database ID on primary
-  create_mode                 = "OnlineSecondary" # If DRP
+  create_mode = "OnlineSecondary" # If DRP
 }
 
 resource "azurerm_mssql_failover_group" "drp" {
@@ -141,7 +119,7 @@ resource "azurerm_mssql_failover_group" "drp" {
   tags      = data.azurerm_resource_group.rg.tags
   server_id = azurerm_mssql_server.primary.id
   databases = [
-    azurerm_mssql_database.example.id
+    azurerm_mssql_database.primary.id
   ]
 
   partner_server {

@@ -1,6 +1,6 @@
 locals {
-  pe_private_dns_zone_name     = "privatelink.postgres.cosmos.azure.com"
-  pe_subresource_name          = "coordinator"
+  pe_private_dns_zone_name     = "privatelink.database.windows.net"
+  pe_subresource_name          = "sqlServer"
   pe_with_existing_dns_zone    = { for pe in var.private_endpoints : pe.subnet_id => pe.existing_private_dns_zone_id if pe.existing_private_dns_zone_id != "" }
   pe_without_existing_dns_zone = { for pe in var.private_endpoints : pe.subnet_id => pe.existing_private_dns_zone_id if pe.existing_private_dns_zone_id == "" }
 }
@@ -11,7 +11,7 @@ module "private_endpoints_with_existing_dns_zone" {
   resource_group_name          = var.resource_group_name
   identifier                   = "${var.identifier}-${element(split("/", each.key), length(split("/", each.key)) - 1)}"
   subnet_id                    = each.key
-  resource_id                  = azurerm_cosmosdb_postgresql_cluster.sql.id
+  resource_id                  = azurerm_mssql_server.primary.id
   private_dns_zone_name        = local.pe_private_dns_zone_name
   subresource_name             = local.pe_subresource_name
   existing_private_dns_zone_id = each.value
@@ -53,7 +53,7 @@ module "private_endpoints_without_existing_dns_zone" {
   resource_group_name          = var.resource_group_name
   identifier                   = "${var.identifier}-${element(split("/", each.key), length(split("/", each.key)) - 1)}"
   subnet_id                    = each.key
-  resource_id                  = azurerm_cosmosdb_postgresql_cluster.sql.id
+  resource_id                  = azurerm_mssql_server.primary.id
   private_dns_zone_name        = local.pe_private_dns_zone_name
   subresource_name             = local.pe_subresource_name
   existing_private_dns_zone_id = length(local.pe_without_existing_dns_zone) > 1 ? local.private_dns_zone_id : ""
