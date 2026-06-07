@@ -1,0 +1,76 @@
+name: Terraform CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    name: 📐 Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Terraform Format Check
+        run: terraform fmt -recursive -check
+
+  validate:
+    name: 🔍 Validate Modules
+    runs-on: ubuntu-latest
+    needs: format
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - module-app-configuration-infrastructure
+          - module-appservices-infrastructure
+          - module-container-apps-infrastructure
+          - module-cosmos-infrastructure
+          - module-cosmos-postgres-sql-infrastructure
+          - module-events-hubs-infrastructure
+          - module-networks-infrastructure
+          - module-private-endpoints-infrastructure
+          - module-secrets-infrastructure
+          - module-sqlserver-infrastructure
+          - module-storage-infrastructure
+          - module-stream-analytics-infrastructure
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Terraform Init
+        working-directory: ${{ matrix.module }}
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Validate
+        working-directory: ${{ matrix.module }}
+        run: terraform validate
+
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: format
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          soft_fail: true

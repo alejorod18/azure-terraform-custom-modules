@@ -1,0 +1,56 @@
+# Ignorar archivos de estado de Terraform en cualquier ubicación
+**/*.tfstate
+**/*.tfstate.*
+**/*.backup
+
+# Ignorar el directorio de Terraform en cualquier ubicación
+**/.terraform/
+**/.terraform.lock.hcl
+
+# Ignorar variables sensibles y configuraciones específicas
+**/*.tfvars
+**/*.tfvars.json
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+**/terraform.tfvars
+
+# Ignorar archivos de salida de Terraform Plan
+**/terraform.tfplan
+
+# Archivos de logs y debugging
+**/crash.log
+**/*.log
+
+# Configuración específica del usuario
+**/.terraformrc
+**/terraform.rc
+
+# Directorios y archivos generados por IDEs
+**/.idea/
+**/.vscode/
+**/*.iml
+**/*.swp
+**/*.swo
+
+# Archivos generados por sistemas operativos
+**/.DS_Store
+**/Thumbs.db
+**/desktop.ini
+
+# Archivos de compilación o dependencias (si hay código auxiliar en otros lenguajes)
+**/node_modules/
+**/target/
+**/bin/
+**/obj/
+**/venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.class
+
+# Archivos de control de versiones de otros sistemas
+**/*.bak
+**/*.orig
+**/*.rej

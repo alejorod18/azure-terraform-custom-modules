@@ -1,0 +1,59 @@
+# =============================================================================
+# Example Variable Values
+# =============================================================================
+# Copy this file and rename to terraform.tfvars, then fill in your values.
+#
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# WARNING: Never commit terraform.tfvars to version control!
+# =============================================================================
+
+# General
+subscription_id    = "<your-azure-subscription-id>"
+resource_group_name = "rg-myproject-dev"
+virtual_network_name = "vnet-myproject-dev-eastus-001"
+identifier         = "myproject"
+
+# Log Analytics (required for diagnostics)
+log_analytics_workspace_id = "/subscriptions/<your-azure-subscription-id>/resourceGroups/rg-common-dev/providers/Microsoft.OperationalInsights/workspaces/log-common-dev"
+
+# Networking
+subnet_appservice_prefix        = "10.0.1.0/24"
+subnet_private_endpoints_prefix = "10.0.2.0/24"
+
+# App Service
+app_service_sku = "P1v2"
+
+# Cosmos DB databases and containers
+cosmos_databases = {
+  "appdb" = {
+    throughput = 400
+    containers = {
+      "users" = {
+        partition_key_paths = ["/userId"]
+        max_throughput      = 1000
+      }
+      "orders" = {
+        partition_key_paths = ["/orderId"]
+        max_throughput      = 4000
+      }
+    }
+  }
+}
+
+# Event Hubs
+event_hubs = {
+  "telemetry" = {
+    partition_count   = 4
+    message_retention = 7
+    consumer_groups   = ["analytics-consumer", "processor-consumer"]
+  }
+  "notifications" = {
+    partition_count   = 2
+    message_retention = 1
+    consumer_groups   = ["push-service"]
+  }
+}
+
+# Storage containers
+storage_containers = ["data", "backups", "uploads", "exports"]

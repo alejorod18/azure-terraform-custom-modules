@@ -1,0 +1,33 @@
+{
+  "captureDescription": {
+    "destination": {
+      "archiveNameFormat": "{Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}",
+      "blobContainer": "capture-custom-eventhubs-test",
+      "name": "EventHubArchive.AzureBlockBlob",
+      "storageAccountResourceId": "/subscriptions/<your-azure-subscription-id>/resourceGroups/test-git/providers/Microsoft.Storage/storageAccounts/ehcustomeventhubstest"
+    },
+    "enabled": true,
+    "encoding": "Avro",
+    "intervalInSeconds": 300,
+    "sizeLimitInBytes": 10485760,
+    "skipEmptyArchives": true
+  },
+  "createdAt": "2024-11-27T03:03:22.38",
+  "id": "/subscriptions/<your-azure-subscription-id>/resourceGroups/test-git/providers/Microsoft.EventHub/namespaces/eh-custom-eventhubs-test/eventhubs/example-hub-1",
+  "location": "eastus",
+  "messageRetentionInDays": 7,
+  "name": "example-hub-1",
+  "partitionCount": 2,
+  "partitionIds": [
+    "0",
+    "1"
+  ],
+  "resourceGroup": "test-git",
+  "retentionDescription": {
+    "cleanupPolicy": "Delete",
+    "retentionTimeInHours": 168
+  },
+  "status": "Active",
+  "type": "Microsoft.EventHub/namespaces/eventhubs",
+  "updatedAt": "2024-11-27T16:52:30.987"
+}
